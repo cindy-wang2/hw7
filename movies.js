@@ -7,31 +7,33 @@ firebase.auth().onAuthStateChanged(async function(user){
   let movies = json.results
 
   if(user){
-    db.collection('users').doc(user.uid).set({
+      db.collection('users').doc(user.uid).set({
       name: user.displayName,
       email: user.email
+      })
+
+      document.querySelector('.sign-in-or-sign-out').innerHTML = `<h3>Hi there, ${user.displayName}!</h3><a href="#" class="sign-out text-green-500 underline">Sign out</a>`
+
+      document.querySelector('.sign-out').addEventListener('click', function(event){
+        event.preventDefault()
+        firebase.auth().signOut()
+        document.location.href = 'movies.html'
     })
 
-    document.querySelector('.sign-in-or-sign-out').innerHTML = `<h3>Hi there, ${user.displayName}!</h3><a href="#" class="sign-out text-green-500 underline">Sign out</a>`
-
-    document.querySelector('.sign-out').addEventListener('click', function(event){
-      event.preventDefault()
-      firebase.auth().signOut()
-      document.location.href = 'movies.html'
-    })
-
-    for (let i=0; i<movies.length; i++) {
-      let movie = movies[i]
-      let userId = user.uid
-      let docRef = await db.collection('watched').where('userId', '==', user.uid).get()
-      let watchedMovie = docRef.docs 
-      //let watchedMovie = docRef.data()
-      let opacityClass = ''
-      if (watchedMovie) {
-        opacityClass = 'opacity-20'
-      }else{
-        opacityClass = 'opacity-1'
-      }
+      //Render all movies
+    
+      for (let i=0; i<movies.length; i++) {
+        let movie = movies[i]
+        let userId = user.uid
+        let opacityClass = ''
+        let docRef = await db.collection('watched').doc(`${movie.id}`).get()
+        let watchedMovie = docRef.data()
+        if (watchedMovie) {
+          opacityClass = 'opacity-20'
+          let docRef = await db.collection('watched').where('userId', '==', user.uid).get()
+        }else{
+          opacityClass = 'opacity-1'
+        }
   
       document.querySelector('.movies').insertAdjacentHTML('beforeend', `
         <div class="w-1/5 p-4 movie-${movie.id} ${opacityClass}">
@@ -43,20 +45,18 @@ firebase.auth().onAuthStateChanged(async function(user){
         event.preventDefault()
         let movieElement = document.querySelector(`.movie-${movie.id}`)
         movieElement.classList.add('opacity-20')
-        await db.collection('watched').doc(`${movie.id}-${userId}`).set({})
+        await db.collection('watched').doc(`${movie.id}`).set({})
       }) 
     }
 
   }else{
-    console.log('no user')
-
+    //hide data
     document.querySelector('.movies').classList.add('hidden')
 
     //Initialize FirebaseUI Auth
     let ui = new firebaseui.auth.AuthUI(firebase.auth())
 
     //FirebaseUI configuration
-
     let authUIConfig = {
     signInOptions: [
       firebase.auth.EmailAuthProvider.PROVIDER_ID
@@ -66,7 +66,6 @@ firebase.auth().onAuthStateChanged(async function(user){
 
     // Starts FirebaseUI Auth
     ui.start('.sign-in-or-sign-out', authUIConfig)
-
   }
 
 })
