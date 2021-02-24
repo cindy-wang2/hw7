@@ -21,7 +21,6 @@ firebase.auth().onAuthStateChanged(async function(user){
     })
 
       //Render all movies
-    
       for (let i=0; i<movies.length; i++) {
         let movie = movies[i]
         let userId = user.uid
