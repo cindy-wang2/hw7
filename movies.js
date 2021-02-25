@@ -19,8 +19,6 @@ firebase.auth().onAuthStateChanged(async function(user){
         firebase.auth().signOut()
         document.location.href = 'movies.html'
     })
-
-      //Render all movies
       for (let i=0; i<movies.length; i++) {
         let movie = movies[i]
         let userId = user.uid
@@ -29,9 +27,6 @@ firebase.auth().onAuthStateChanged(async function(user){
         let watchedMovie = docRef.data()
         if (watchedMovie) {
           opacityClass = 'opacity-20'
-
-          //Pull just watched movies for this userid
-          //let docRef = await db.collection('watched').where('userId', '==', user.uid).get()
         }else{
           opacityClass = 'opacity-1'
         }
@@ -70,11 +65,3 @@ firebase.auth().onAuthStateChanged(async function(user){
   }
 
 })
-
-// Step 3: Setting the TMDB movie ID as the document ID on your "watched" collection
-//         will no longer work. The document ID should now be a combination of the
-//         TMDB movie ID and the user ID indicating which user has watched. 
-//         This "composite" ID could simply be `${movieId}-${userId}`. This should 
-//         be set when the "I've watched" button on each movie is clicked. Likewise, 
-//         when the list of movies loads and is shown on the page, only the movies 
-//         watched by the currently logged-in user should be opaque.
