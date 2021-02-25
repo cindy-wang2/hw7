@@ -25,11 +25,13 @@ firebase.auth().onAuthStateChanged(async function(user){
         let movie = movies[i]
         let userId = user.uid
         let opacityClass = ''
-        let docRef = await db.collection('watched').doc(`${movie.id}`).get()
+        let docRef = await db.collection('watched').doc(`${movie.id}-${user.uid}`).get()
         let watchedMovie = docRef.data()
         if (watchedMovie) {
           opacityClass = 'opacity-20'
-          let docRef = await db.collection('watched').where('userId', '==', user.uid).get()
+
+          //Pull just watched movies for this userid
+          //let docRef = await db.collection('watched').where('userId', '==', user.uid).get()
         }else{
           opacityClass = 'opacity-1'
         }
@@ -44,7 +46,7 @@ firebase.auth().onAuthStateChanged(async function(user){
         event.preventDefault()
         let movieElement = document.querySelector(`.movie-${movie.id}`)
         movieElement.classList.add('opacity-20')
-        await db.collection('watched').doc(`${movie.id}`).set({})
+        await db.collection('watched').doc(`${movie.id}-${user.uid}`).set({})
       }) 
     }
 
